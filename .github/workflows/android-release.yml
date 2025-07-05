@@ -2,6 +2,8 @@ name: Build & Release APK
 
 on:
   push:
+    tags:
+      - release
     branches:
       - main
   workflow_dispatch:
