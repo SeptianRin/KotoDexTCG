@@ -1,44 +1,51 @@
-name: Build & Release APK
+name: Android Release CI
 
+# This workflow triggers on every push to the main branch
 on:
   push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+    branches: [ "main" ]
 
 jobs:
-  build:
-    name: Build APK
+  build-and-release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      # Step 1: Check out the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      # Step 2: Set up the Java Development Kit (JDK)
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
+          java-version: '17'
           distribution: 'temurin'
-          java-version: 17
+          cache: gradle
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+      # Step 3: Decode the keystore from secrets and write it to a file
+      - name: Decode Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE }}
+        run: |
+          echo $KEYSTORE_BASE64 | base64 --decode > ${{ github.workspace }}/keystore.jks
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-
-      - name: Build release APK
+      # Step 4: Build the release APK
+      - name: Build with Gradle
+        env:
+          # Pass the secrets to the Gradle build as environment variables
+          KEYSTORE_FILE: ${{ github.workspace }}/keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease
 
-      - name: Upload APK as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: KotoDexTCG-release-apk
-          path: app/build/outputs/apk/release/app-release.apk
-      - name: Create GitHub Release
+      # Step 5: Create a GitHub Release and upload the APK
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          # The release will be tagged with the current date and commit hash
+          tag_name: release-${{ github.run_number }}-${{ github.sha }}
+          name: "Release ${{ github.run_number }}"
+          body: "Automated release of KotoDex TCG."
           files: app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
