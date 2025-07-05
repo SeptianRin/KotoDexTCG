@@ -32,7 +32,11 @@ jobs:
           fileName: 'keystore.jks'
           encodedString: ${{ secrets.KEYSTORE }}
 
-      # Step 4: Build the release APK
+      # Step 4: Run unit test
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+      # Step 5: Build the release APK
       - name: Build with Gradle
         env:
           # Pass the secrets to the Gradle build as environment variables
@@ -43,7 +47,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease
 
-      # Step 5: Create a GitHub Release and upload the APK
+      # Step 6: Create a GitHub Release and upload the APK
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
