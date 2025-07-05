@@ -8,6 +8,9 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    # FIXED: Add permissions for the job to create a release
+    permissions:
+      contents: write
     steps:
       # Step 1: Check out the code from the repository
       - name: Checkout code
@@ -46,6 +49,7 @@ jobs:
           tag_name: release-${{ github.run_number }}-${{ github.sha }}
           name: "Release ${{ github.run_number }}"
           body: "Automated release of KotoDex TCG."
-          files: app/build/outputs/apk/release/app-release.apk
+          # FIXED: Use a wildcard to find the APK regardless of its exact name
+          files: app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
