@@ -20,13 +20,13 @@ android {
 
     signingConfigs {
         create("release") {
-            // Read signing details from environment variables, which will be set by GitHub Actions
-            val keystoreFile = System.getenv("KEYSTORE_FILE")?.let { file(it) }
-            if (keystoreFile?.exists() == true) {
-                storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
+            // This property will be read at execution time when the env vars are available
+            val storeFile by project.extra(System.getenv("KEYSTORE_FILE"))
+            if (storeFile != null) {
+                this.storeFile = file(storeFile)
+                this.storePassword = System.getenv("KEYSTORE_PASSWORD")
+                this.keyAlias = System.getenv("KEY_ALIAS")
+                this.keyPassword = System.getenv("KEY_PASSWORD")
             }
         }
     }
@@ -38,6 +38,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // This line now correctly applies the lazily-configured signing config
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    # FIXED: Add permissions for the job to create a release
+    # Grant write permissions to the job to allow it to create a release
     permissions:
       contents: write
     steps:
@@ -24,18 +24,20 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Decode the keystore from secrets and write it to a file
+      # Step 3: Decode the keystore from secrets using a dedicated action for reliability
       - name: Decode Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE }}
-        run: |
-          echo $KEYSTORE_BASE64 | base64 --decode > ${{ github.workspace }}/keystore.jks
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'keystore.jks'
+          encodedString: ${{ secrets.KEYSTORE }}
 
       # Step 4: Build the release APK
       - name: Build with Gradle
         env:
           # Pass the secrets to the Gradle build as environment variables
-          KEYSTORE_FILE: ${{ github.workspace }}/keystore.jks
+          # The keystore file path is now an output from the previous step
+          KEYSTORE_FILE: ${{ steps.decode_keystore.outputs.filePath }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -49,7 +51,7 @@ jobs:
           tag_name: release-${{ github.run_number }}-${{ github.sha }}
           name: "Release ${{ github.run_number }}"
           body: "Automated release of KotoDex TCG."
-          # FIXED: Use a wildcard to find the APK regardless of its exact name
+          # Use a wildcard to find the APK regardless of its exact name
           files: app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
