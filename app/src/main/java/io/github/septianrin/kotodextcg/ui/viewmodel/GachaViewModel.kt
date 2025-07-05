@@ -75,6 +75,7 @@ class GachaViewModel(
 
                 _uiState.update {
                     it.copy(
+                        isPreparing = false,
                         pulledCards = packContents,
                         packRarity = determineBestRarity(packContents),
                         interactionState = GachaInteractionState.Tearing
@@ -83,10 +84,6 @@ class GachaViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(isPreparing = false, error = e.message ?: "Failed to prepare pack.")
-                }
-            } finally {
-                _uiState.update {
-                    it.copy(isPreparing = false)
                 }
             }
         }
