@@ -3,9 +3,7 @@ name: Build & Release APK
 on:
   push:
     tags:
-      - release
-    branches:
-      - main
+      - 'v*'
   workflow_dispatch:
 
 jobs:
