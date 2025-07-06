@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preparing_next_pack">Preparing next pack...</string>
+    <string name="you_pulled">You pulled:</string>
+    <string name="pack_error">Pack Error</string>
+    <string name="open_another_pack">Open Another Pack</string>
+    <string name="toppieceoffset">topPieceOffset</string>
+    <string name="slash_to_tear_open">Slash to tear open!</string>
+    <string name="torn">Torn!</string>
+    <string name="trailalpha">trailAlpha</string>
+    <string name="rainbow_transition">rainbow-transition</string>
+    <string name="slash_guide_transition">slash-guide-transition</string>
+    <string name="slash_guide_alpha">slash-guide-alpha</string>
+    <string name="sparkle_shimmer">sparkle-shimmer</string>
+    <string name="shimmeralpha">shimmerAlpha</string>
+</resources>

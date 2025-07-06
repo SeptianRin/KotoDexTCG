@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="clear_collection">Clear Collection?</string>
+    <string name="are_you_sure_you_want_to_permanently_delete_your_entire_card_collection">Are you sure you want to permanently delete your entire card collection?</string>
+    <string name="collection_is_empty">Collection is Empty</string>
+    <string name="open_some_booster_packs_in_the_gacha_screen_to_start_your_collection">Open some booster packs in the Gacha screen to start your collection!</string>
+    <string name="go_to_gacha">Go to Gacha</string>
+</resources>

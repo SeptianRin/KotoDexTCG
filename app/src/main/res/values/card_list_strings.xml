@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_error">Network Error</string>
+    <string name="search_hint">Search Pokémon Name, Type...</string>
+</resources>

@@ -26,10 +26,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
@@ -39,20 +40,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.github.septianrin.kotodextcg.R
 import io.github.septianrin.kotodextcg.ui.feature.carddetail.CardDetailScreen
 import io.github.septianrin.kotodextcg.ui.feature.cardlist.CardListScreen
 import io.github.septianrin.kotodextcg.ui.feature.collection.CollectionScreen
 import io.github.septianrin.kotodextcg.ui.feature.gacha.GachaScreen
 import io.github.septianrin.kotodextcg.ui.theme.KotoDexTCGTheme
-
-object AppRoutes {
-    const val HOME = "home"
-    const val GACHA = "gacha"
-    const val DETAIL = "detail/{cardId}"
-    const val COLLECTION = "collection"
-
-    fun detailRoute(cardId: String) = "detail/$cardId"
-}
+import io.github.septianrin.kotodextcg.util.AppRoutes
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: ImageVector) {
     data object Home : BottomNavItem(AppRoutes.HOME, "Home", Icons.Default.Home)
@@ -64,7 +58,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var isDarkTheme by remember { mutableStateOf(false) }
+            var isDarkTheme by rememberSaveable { mutableStateOf(false) }
 
             KotoDexTCGTheme(darkTheme = isDarkTheme) {
                 MainApp(
@@ -84,10 +78,10 @@ fun MainApp(isDarkTheme: Boolean, onThemeToggle: () -> Unit) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val topBarTitle = when {
-        currentRoute?.startsWith("detail/") == true -> "Card Details"
-        currentRoute == AppRoutes.GACHA -> "Gacha Simulator"
-        currentRoute == AppRoutes.COLLECTION -> "My Collection"
-        else -> "KotoDex"
+        currentRoute?.startsWith("detail/") == true -> stringResource(R.string.card_details)
+        currentRoute == AppRoutes.GACHA -> stringResource(R.string.gacha_simulator)
+        currentRoute == AppRoutes.COLLECTION -> stringResource(R.string.my_collection)
+        else -> stringResource(R.string.kotodex)
     }
 
     val showBackButton = navController.previousBackStackEntry != null
@@ -99,7 +93,12 @@ fun MainApp(isDarkTheme: Boolean, onThemeToggle: () -> Unit) {
                 navigationIcon = {
                     if (showBackButton) {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(
+                                    R.string.back
+                                )
+                            )
                         }
                     }
                 },
@@ -107,7 +106,7 @@ fun MainApp(isDarkTheme: Boolean, onThemeToggle: () -> Unit) {
                     IconButton(onClick = onThemeToggle) {
                         Icon(
                             imageVector = if (isDarkTheme) Icons.Default.Brightness7 else Icons.Default.Brightness4,
-                            contentDescription = "Toggle Theme"
+                            contentDescription = stringResource(R.string.toggle_theme)
                         )
                     }
                 }
@@ -116,7 +115,8 @@ fun MainApp(isDarkTheme: Boolean, onThemeToggle: () -> Unit) {
         bottomBar = {
             BottomAppBar {
                 NavigationBar {
-                    val navigationItems = listOf(BottomNavItem.Home, BottomNavItem.OpenPack, BottomNavItem.Collection)
+                    val navigationItems =
+                        listOf(BottomNavItem.Home, BottomNavItem.OpenPack, BottomNavItem.Collection)
                     navigationItems.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = screen.label) },

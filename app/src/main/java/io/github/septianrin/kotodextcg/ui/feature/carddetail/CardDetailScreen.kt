@@ -37,10 +37,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.septianrin.kotodextcg.R
 import io.github.septianrin.kotodextcg.data.model.Attack
 import io.github.septianrin.kotodextcg.data.model.TcgCard
 import io.github.septianrin.kotodextcg.ui.component.CardDetailOverlay
@@ -78,7 +80,7 @@ fun CardDetailScreen(
                     viewModel.handleEvent(CardDetailEvent.ClearError)
                     viewModel.handleEvent(CardDetailEvent.LoadDetails)
                 },
-                dialogTitle = "Load Error",
+                dialogTitle = stringResource(R.string.load_error),
                 dialogText = errorMessage
             )
         }
@@ -119,7 +121,7 @@ fun CardDetailContent(card: TcgCard, onImageClicked: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = card.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Text(
-                text = "HP: ${card.hp ?: "N/A"} | Rarity: ${card.rarity ?: "N/A"}",
+                text = stringResource(R.string.stats, card.hp ?: "N/A", card.rarity ?: "N/A"),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -142,7 +144,7 @@ fun CardDetailContent(card: TcgCard, onImageClicked: () -> Unit) {
             }
 
             card.attacks?.let { attacks ->
-                DetailSection(title = "Attacks") {
+                DetailSection(title = stringResource(R.string.attacks)) {
                     attacks.forEachIndexed { index, attack ->
                         AttackInfo(attack)
                         if (index < attacks.lastIndex) {
@@ -157,16 +159,26 @@ fun CardDetailContent(card: TcgCard, onImageClicked: () -> Unit) {
 
             Row(Modifier.fillMaxWidth()) {
                 card.weaknesses?.let { weaknesses ->
-                    DetailSection(title = "Weaknesses", modifier = Modifier.weight(1f)) {
+                    DetailSection(title = stringResource(R.string.weaknesses), modifier = Modifier.weight(1f)) {
                         weaknesses.forEach { weakness ->
-                            Text("${weakness.type} (${weakness.value})", color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                stringResource(
+                                    R.string.weakness_data,
+                                    weakness.type,
+                                    weakness.value
+                                ), color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
                 card.resistances?.let { resistances ->
-                    DetailSection(title = "Resistances", modifier = Modifier.weight(1f)) {
+                    DetailSection(title = stringResource(R.string.resistances), modifier = Modifier.weight(1f)) {
                         resistances.forEach { resistance ->
-                            Text("${resistance.type} (${resistance.value})", color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                stringResource(
+                                    R.string.resistance_data,
+                                    resistance.type,
+                                    resistance.value
+                                ), color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }

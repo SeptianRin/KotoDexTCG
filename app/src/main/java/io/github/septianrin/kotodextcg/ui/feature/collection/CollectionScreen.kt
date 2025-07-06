@@ -13,7 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.septianrin.kotodextcg.R
 import io.github.septianrin.kotodextcg.ui.component.CardListItem
 import io.github.septianrin.kotodextcg.ui.component.ErrorDialog
 import io.github.septianrin.kotodextcg.ui.component.InfoState
@@ -37,8 +39,8 @@ fun CollectionScreen(
                 viewModel.handleEvent(CollectionEvent.ClearCollection)
                 showClearConfirmationDialog = false
             },
-            dialogTitle = "Clear Collection?",
-            dialogText = "Are you sure you want to permanently delete your entire card collection?",
+            dialogTitle = stringResource(R.string.clear_collection),
+            dialogText = stringResource(R.string.are_you_sure_you_want_to_permanently_delete_your_entire_card_collection),
             icon = Icons.Default.DeleteForever,
             confirmButtonText = "Clear",
         )
@@ -52,8 +54,8 @@ fun CollectionScreen(
             ) {
                 InfoState(
                     icon = Icons.Default.Inbox,
-                    title = "Collection is Empty",
-                    message = "Open some booster packs in the Gacha screen to start your collection!",
+                    title = stringResource(R.string.collection_is_empty),
+                    message = stringResource(R.string.open_some_booster_packs_in_the_gacha_screen_to_start_your_collection),
                     modifier = Modifier.padding(bottom = 64.dp)
                 )
                 Button(
@@ -62,7 +64,7 @@ fun CollectionScreen(
                         .align(Alignment.BottomCenter)
                         .padding(16.dp)
                 ) {
-                    Text("Go to Gacha")
+                    Text(stringResource(R.string.go_to_gacha))
                 }
             }
         } else {

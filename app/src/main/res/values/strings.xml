@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">KotoDex TCG</string>
+    <string name="card_details">Card Details</string>
+    <string name="gacha_simulator">Gacha Simulator</string>
+    <string name="my_collection">My Collection</string>
+    <string name="kotodex">KotoDex</string>
+    <string name="toggle_theme">Toggle Theme</string>
+    <string name="back">Back</string>
 </resources>

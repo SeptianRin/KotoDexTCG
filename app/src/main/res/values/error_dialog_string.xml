@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dismiss">Dismiss</string>
+    <string name="error_icon">Error Icon</string>
+    <string name="try_again">Try Again</string>
+</resources>

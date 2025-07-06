@@ -29,8 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import io.github.septianrin.kotodextcg.R
 import io.github.septianrin.kotodextcg.data.model.TcgCard
 import io.github.septianrin.kotodextcg.ui.component.CardDetailOverlay
 import io.github.septianrin.kotodextcg.ui.component.CardListItem
@@ -115,7 +117,7 @@ fun CardListScreen(
                     viewModel.handleEvent(CardListEvent.ClearError)
                     viewModel.handleEvent(CardListEvent.LoadFirstPage)
                 },
-                dialogTitle = "Network Error",
+                dialogTitle = stringResource(R.string.network_error),
                 dialogText = errorMessage
             )
         }
@@ -137,7 +139,7 @@ fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChanged,
-        label = { Text("Search Pokémon Name, Type...") },
+        label = { Text(stringResource(R.string.search_hint)) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),

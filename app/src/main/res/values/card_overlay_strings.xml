@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_view">%1$s detail view</string>
+    <string name="empty" />
+</resources>

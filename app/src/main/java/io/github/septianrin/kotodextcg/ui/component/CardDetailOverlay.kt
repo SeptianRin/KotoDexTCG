@@ -20,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
+import io.github.septianrin.kotodextcg.R
 import io.github.septianrin.kotodextcg.data.model.TcgCard
 
 @Composable
@@ -36,7 +38,7 @@ fun CardDetailOverlay(tcgCard: TcgCard, onDismiss: () -> Unit) {
     val overlayAlpha by animateFloatAsState(
         targetValue = 1f,
         animationSpec = tween(300),
-        label = ""
+        label = stringResource(R.string.empty)
     )
 
     Box(
@@ -48,7 +50,7 @@ fun CardDetailOverlay(tcgCard: TcgCard, onDismiss: () -> Unit) {
     ) {
         AsyncImage(
             model = tcgCard.images?.large,
-            contentDescription = "${tcgCard.name} detail view",
+            contentDescription = stringResource(R.string.detail_view, tcgCard.name),
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .align(Alignment.Center)

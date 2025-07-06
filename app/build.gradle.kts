@@ -42,7 +42,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // This line now correctly applies the lazily-configured signing config
             signingConfig = signingConfigs.getByName("release")
         }
     }

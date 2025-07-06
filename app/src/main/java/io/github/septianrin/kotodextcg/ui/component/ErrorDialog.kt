@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import io.github.septianrin.kotodextcg.R
 
 @Composable
 fun ErrorDialog(
@@ -16,11 +18,11 @@ fun ErrorDialog(
     dialogTitle: String,
     dialogText: String,
     icon: ImageVector = Icons.Default.Warning,
-    confirmButtonText: String = "Try Again"
+    confirmButtonText: String = stringResource(R.string.try_again)
 ) {
     AlertDialog(
         icon = {
-            Icon(icon, contentDescription = "Error Icon")
+            Icon(icon, contentDescription = stringResource(R.string.error_icon))
         },
         title = {
             Text(text = dialogTitle)
@@ -46,7 +48,7 @@ fun ErrorDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text(stringResource(R.string.dismiss))
             }
         }
     )

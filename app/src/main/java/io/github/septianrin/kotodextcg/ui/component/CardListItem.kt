@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.github.septianrin.kotodextcg.data.model.TcgCard
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import io.github.septianrin.kotodextcg.R
 
 @Composable
 fun CardListItem(
@@ -51,7 +53,7 @@ fun CardListItem(
             if (showZoomIcon) {
                 Icon(
                     imageVector = Icons.Default.Fullscreen,
-                    contentDescription = "Zoomable",
+                    contentDescription = stringResource(R.string.zoomable),
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(8.dp)
@@ -63,7 +65,7 @@ fun CardListItem(
 
             if (tcgCard.count > 1) {
                 Text(
-                    text = "x${tcgCard.count}",
+                    text = stringResource(R.string.counter, tcgCard.count),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)

@@ -56,6 +56,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -89,7 +90,7 @@ fun GachaScreen(
         if (vmState.isPreparing) {
             CircularProgressIndicator()
             Text(
-                "Preparing next pack...",
+                stringResource(R.string.preparing_next_pack),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )
@@ -109,7 +110,7 @@ fun GachaScreen(
                         viewModel.handleEvent(GachaEvent.SavePulledCards)
                     }
                     Text(
-                        "You pulled:",
+                        stringResource(R.string.you_pulled),
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -133,7 +134,7 @@ fun GachaScreen(
                                 viewModel.handleEvent(GachaEvent.ClearError)
                                 viewModel.handleEvent(GachaEvent.PrepareNewPack)
                             },
-                            dialogTitle = "Pack Error",
+                            dialogTitle = stringResource(R.string.pack_error),
                             dialogText = errorMessage
                         )
                     }
@@ -150,7 +151,7 @@ fun GachaScreen(
                         },
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Text("Open Another Pack")
+                        Text(stringResource(R.string.open_another_pack))
                     }
                 }
             }
@@ -170,7 +171,7 @@ fun InteractiveBoosterPack(rarity: Rarity, onSlashComplete: () -> Unit) {
     val topPieceOffsetY by animateFloatAsState(
         targetValue = if (isSlashed) -800f else 0f,
         animationSpec = tween(durationMillis = 600, easing = FastOutLinearInEasing),
-        label = "topPieceOffset",
+        label = stringResource(R.string.toppieceoffset),
         finishedListener = {
             onSlashComplete()
         }
@@ -188,7 +189,7 @@ fun InteractiveBoosterPack(rarity: Rarity, onSlashComplete: () -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = if (!isSlashed) "Slash to tear open!" else "Torn!",
+            text = if (!isSlashed) stringResource(R.string.slash_to_tear_open) else stringResource(R.string.torn),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -260,11 +261,11 @@ fun RainbowTrail(points: List<Offset>, isVisible: Boolean) {
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 300),
-        label = "trailAlpha"
+        label = stringResource(R.string.trailalpha)
     )
 
     // Color Shift
-    val infiniteTransition = rememberInfiniteTransition(label = "rainbow-transition")
+    val infiniteTransition = rememberInfiniteTransition(label = stringResource(R.string.rainbow_transition))
     val colorShift by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -272,7 +273,7 @@ fun RainbowTrail(points: List<Offset>, isVisible: Boolean) {
             animation = tween(10000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "rainbow-color-shift"
+        label = stringResource(R.string.rainbow_color_shift)
     )
 
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -318,14 +319,14 @@ fun RainbowTrail(points: List<Offset>, isVisible: Boolean) {
 
 @Composable
 fun SlashGuide(modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition(label = "slash-guide-transition")
+    val infiniteTransition = rememberInfiniteTransition(label = stringResource(R.string.slash_guide_transition))
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.8f,
         animationSpec = infiniteRepeatable(
             animation = tween(1000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
-        ), label = "slash-guide-alpha"
+        ), label = stringResource(R.string.slash_guide_alpha)
     )
 
     Canvas(modifier = modifier) {
@@ -361,7 +362,7 @@ fun BoosterPackAsset(
             setShadowLayer(5f, 0f, 0f, android.graphics.Color.BLACK)
         }
     }
-    val shimmerAlpha by rememberInfiniteTransition(label = "sparkle-shimmer")
+    val shimmerAlpha by rememberInfiniteTransition(label = stringResource(R.string.sparkle_shimmer))
         .animateFloat(
             initialValue = 0.3f,
             targetValue = 0.8f,
@@ -369,7 +370,7 @@ fun BoosterPackAsset(
                 animation = tween(durationMillis = 1000, easing = LinearEasing),
                 repeatMode = RepeatMode.Reverse
             ),
-            label = "shimmerAlpha"
+            label = stringResource(R.string.shimmeralpha)
         )
 
     Canvas(modifier = modifier) {
