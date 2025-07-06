@@ -22,10 +22,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
-import io.github.septianrin.kotodextcg.data.model.Card
+import io.github.septianrin.kotodextcg.data.model.TcgCard
 
 @Composable
-fun CardDetailOverlay(card: Card, onDismiss: () -> Unit) {
+fun CardDetailOverlay(tcgCard: TcgCard, onDismiss: () -> Unit) {
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     val transformableState = rememberTransformableState { zoomChange, offsetChange, _ ->
@@ -47,8 +47,8 @@ fun CardDetailOverlay(card: Card, onDismiss: () -> Unit) {
             .clickable(onClick = onDismiss)
     ) {
         AsyncImage(
-            model = card.images?.large,
-            contentDescription = "${card.name} detail view",
+            model = tcgCard.images?.large,
+            contentDescription = "${tcgCard.name} detail view",
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .align(Alignment.Center)

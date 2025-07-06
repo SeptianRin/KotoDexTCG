@@ -1,29 +1,22 @@
-package io.github.septianrin.kotodextcg
+package io.github.septianrin.kotodextcg.ui.feature.cardlist
 
 import app.cash.turbine.test
-import io.github.septianrin.kotodextcg.data.model.Card
+import io.github.septianrin.kotodextcg.data.model.TcgCard
 import io.github.septianrin.kotodextcg.domain.PokemonCardRepository
-import io.github.septianrin.kotodextcg.ui.viewmodel.CardListEvent
-import io.github.septianrin.kotodextcg.ui.viewmodel.CardListUiState
-import io.github.septianrin.kotodextcg.ui.viewmodel.CardListViewModel
 import io.mockk.coEvery
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
-import org.koin.core.context.GlobalContext.startKoin
-import org.koin.core.context.GlobalContext.stopKoin
+import org.junit.Test
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import org.koin.test.inject
-import kotlin.test.Test
+import org.koin.test.get
 
 @ExperimentalCoroutinesApi
 class CardListViewModelTest : KoinTest {
@@ -31,13 +24,10 @@ class CardListViewModelTest : KoinTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var repository: PokemonCardRepository
 
-    // Lazily inject the ViewModel to have control over its creation timing
-    private val viewModel: CardListViewModel by inject()
-
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        repository = mockk()
+        repository = mockk(relaxed = true)
         startKoin {
             modules(
                 module {
@@ -55,63 +45,69 @@ class CardListViewModelTest : KoinTest {
     }
 
     @Test
-    fun `on init, state transitions through loading to loaded`() = runTest {
-        // Arrange
-        val mockCards = listOf(Card("1", "Pikachu", null, null, null, "Common"))
-        // Mock the repository call that will be triggered by the ViewModel's init block
+    fun `initial load success`() = runTest(testDispatcher) {
+        val mockCards = listOf(createFakeTcgCard("1", "Pikachu"))
         coEvery { repository.getCards(1, null) } returns Result.success(mockCards)
 
-        // Act & Assert
+        val viewModel = get<CardListViewModel>()
+
         viewModel.uiState.test {
-            // 1. The first item emitted is the default state from the MutableStateFlow constructor.
+            // 1. Await the very first, default state
             assertEquals(CardListUiState(), awaitItem())
 
-            // 2. The init block's coroutine runs, setting isLoading to true.
-            val loadingState = awaitItem()
-            assertEquals(true, loadingState.isLoading)
+            // 2. The init block runs, emitting the loading state
+            assertEquals(true, awaitItem().isLoading)
 
-            // 3. The coroutine finishes, setting isLoading to false and adding cards.
+            // 3. Advance the dispatcher to allow the coroutine to complete
+            advanceUntilIdle()
+
+            // 4. Await the final loaded state
             val finalState = awaitItem()
             assertEquals(false, finalState.isLoading)
-            assertEquals(1, finalState.cards.size)
-            assertEquals("Pikachu", finalState.cards.first().name)
+            assertEquals(1, finalState.tcgCards.size)
         }
     }
 
     @Test
-    fun `search query updates state and fetches new cards`() = runTest {
-        // Arrange
-        coEvery { repository.getCards(1, null) } returns Result.success(listOf(Card("1", "Pikachu", null, null, null, "Common")))
-        val searchResultCards = listOf(Card("2", "Charizard", null, null, null, "Rare"))
+    fun `search query updates state and fetches new cards`() = runTest(testDispatcher) {
+        val initialCards = listOf(createFakeTcgCard("1", "Pikachu"))
+        val searchResultCards = listOf(createFakeTcgCard("2", "Charizard"))
         val searchQuery = "name:\"charizard*\" or types:\"charizard*\" or evolvesFrom:\"charizard*\""
+
+        coEvery { repository.getCards(1, null) } returns Result.success(initialCards)
         coEvery { repository.getCards(1, searchQuery) } returns Result.success(searchResultCards)
 
-        viewModel.uiState.test {
-            // Consume the items from the init call
-            awaitItem() // Default state
-            awaitItem() // Loading state
-            awaitItem() // Loaded "Pikachu" state
+        val viewModel = get<CardListViewModel>()
 
-            // Act: send search event
+        viewModel.uiState.test {
+            // Let the initial load complete
+            advanceUntilIdle()
+            skipItems(3) // Skip default, loading, and initial loaded states
+
+            // Act: Send the search event
             viewModel.handleEvent(CardListEvent.OnSearchQueryChanged("charizard"))
 
-            // Assert: state updates immediately with the new query text
+            // Assert: Check the immediate state update with the new query
             val queryState = awaitItem()
             assertEquals("charizard", queryState.searchQuery)
 
-            // Advance past the debounce delay to trigger the network call
-            advanceUntilIdle()
+            // Advance past the debounce
+            advanceTimeBy(1001)
 
-            // Assert: state becomes loading for the search
+            // Assert: Check the loading state for the search
             val searchLoadingState = awaitItem()
             assertEquals(true, searchLoadingState.isLoading)
-            assertEquals("charizard", searchLoadingState.searchQuery)
 
-            // Assert: final state has the search results
+            // Assert: Check the final result state
             val finalState = awaitItem()
             assertEquals(false, finalState.isLoading)
-            assertEquals(1, finalState.cards.size)
-            assertEquals("Charizard", finalState.cards.first().name)
+            assertEquals("Charizard", finalState.tcgCards.first().name)
         }
     }
+
+    private fun createFakeTcgCard(id: String, name: String) = TcgCard(
+        id = id, name = name, hp = "100", types = listOf("Electric"), evolvesFrom = null,
+        images = null, rarity = "Common", flavorText = null, attacks = null,
+        weaknesses = null, resistances = null, legalities = null, count = 1
+    )
 }

@@ -1,5 +1,9 @@
-package io.github.septianrin.kotodextcg.ui.screen
+@file:OptIn(ExperimentalFoundationApi::class)
 
+package io.github.septianrin.kotodextcg.ui.feature.cardlist
+
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,23 +30,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.septianrin.kotodextcg.data.model.Card
+import io.github.septianrin.kotodextcg.data.model.TcgCard
 import io.github.septianrin.kotodextcg.ui.component.CardDetailOverlay
 import io.github.septianrin.kotodextcg.ui.component.CardListItem
-import io.github.septianrin.kotodextcg.ui.viewmodel.CardListEvent
-import io.github.septianrin.kotodextcg.ui.viewmodel.CardListViewModel
+import io.github.septianrin.kotodextcg.ui.component.ErrorDialog
+import io.github.septianrin.kotodextcg.ui.component.LoadingIndicator
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CardListScreen(
     modifier: Modifier = Modifier,
     listState: LazyGridState,
+    onCardClicked: (String) -> Unit,
     viewModel: CardListViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedCard by remember { mutableStateOf<Card?>(null) }
+    var selectedTcgCard by remember { mutableStateOf<TcgCard?>(null) }
 
     val isAtBottom = !listState.canScrollForward
 
@@ -54,7 +58,7 @@ fun CardListScreen(
 
     LaunchedEffect(uiState.isLoadingNextPage) {
         if (uiState.isLoadingNextPage) {
-            val lastIndex = uiState.cards.size - 1
+            val lastIndex = uiState.tcgCards.size - 1
             if (lastIndex >= 0) {
                 listState.animateScrollToItem(lastIndex)
             }
@@ -76,58 +80,49 @@ fun CardListScreen(
                 .padding(paddingValues),
             contentAlignment = Alignment.Center
         ) {
-            when {
-                uiState.isLoading -> {
-                    CircularProgressIndicator()
-                }
-
-                uiState.error != null -> {
-                    Text(
-                        text = "An error occurred:\n${uiState.error}",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-
-                uiState.cards.isEmpty() -> {
-                    val message = if (uiState.searchQuery.isNotBlank()) {
-                        "No results found for \"${uiState.searchQuery}\""
-                    } else {
-                        "No Pokémon cards found."
+            if (uiState.isLoading) {
+                CircularProgressIndicator()
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    state = listState,
+                    contentPadding = PaddingValues(8.dp),
+                    modifier = Modifier.matchParentSize()
+                ) {
+                    items(uiState.tcgCards.size) { index ->
+                        val card = uiState.tcgCards[index]
+                        CardListItem(
+                            tcgCard = card,
+                            onClick = { onCardClicked(card.id) },
+                            modifier = Modifier.animateItemPlacement(
+                                tween(durationMillis = 300)
+                            )
+                        )
                     }
-                    Text(
-                        text = message,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
 
-                else -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        state = listState,
-                        contentPadding = PaddingValues(8.dp),
-                        modifier = Modifier.matchParentSize()
-                    ) {
-                        items(uiState.cards.size) { index ->
-                            val card = uiState.cards[index]
-                            CardListItem(card = card) { selectedCard = card }
-                        }
-
-                        if (uiState.isLoadingNextPage) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                LoadingIndicator()
-                            }
+                    if (uiState.isLoadingNextPage) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            LoadingIndicator()
                         }
                     }
                 }
             }
-
         }
-        if (selectedCard != null) {
+        uiState.error?.let { errorMessage ->
+            ErrorDialog(
+                onDismissRequest = { viewModel.handleEvent(CardListEvent.ClearError) },
+                onConfirmation = {
+                    viewModel.handleEvent(CardListEvent.ClearError)
+                    viewModel.handleEvent(CardListEvent.LoadFirstPage)
+                },
+                dialogTitle = "Network Error",
+                dialogText = errorMessage
+            )
+        }
+        if (selectedTcgCard != null) {
             CardDetailOverlay(
-                card = selectedCard!!,
-                onDismiss = { selectedCard = null }
+                tcgCard = selectedTcgCard!!,
+                onDismiss = { selectedTcgCard = null }
             )
         }
     }
@@ -152,16 +147,4 @@ fun SearchBar(
             focusManager.clearFocus()
         })
     )
-}
-
-@Composable
-fun LoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
 }

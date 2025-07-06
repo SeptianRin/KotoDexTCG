@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+configurations.all {
+    exclude(group = "com.intellij", module = "annotations")
+}
+
 android {
     namespace = "io.github.septianrin.kotodextcg"
     compileSdk = 34
@@ -62,10 +66,14 @@ android {
             excludes += "META-INF/LICENSE-notice.md"
         }
     }
+    sourceSets {
+        getByName("main") {
+            java.srcDirs("build/generated/ksp/main/kotlin")
+        }
+    }
 }
 
 dependencies {
-
     // Core dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -80,6 +88,8 @@ dependencies {
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.koin)
     implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.room)
+    ksp(libs.androidx.room.compiler)
 
     implementation(libs.coil.compose)
 

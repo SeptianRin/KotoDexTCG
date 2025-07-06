@@ -1,15 +1,20 @@
 package io.github.septianrin.kotodextcg.di
 
+import androidx.room.Room
 import io.github.septianrin.kotodextcg.data.api.PokemonTcgApiService
+import io.github.septianrin.kotodextcg.data.db.KotoDexDatabase
 import io.github.septianrin.kotodextcg.data.repository.PokemonCardRepositoryImpl
 import io.github.septianrin.kotodextcg.domain.PokemonCardRepository
+import io.github.septianrin.kotodextcg.ui.feature.carddetail.CardDetailViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import io.github.septianrin.kotodextcg.ui.viewmodel.CardListViewModel
-import io.github.septianrin.kotodextcg.ui.viewmodel.GachaViewModel
+import io.github.septianrin.kotodextcg.ui.feature.cardlist.CardListViewModel
+import io.github.septianrin.kotodextcg.ui.feature.collection.CollectionViewModel
+import io.github.septianrin.kotodextcg.ui.feature.gacha.GachaViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 
 val appModule = module {
@@ -34,8 +39,20 @@ val appModule = module {
         get<Retrofit>().create(PokemonTcgApiService::class.java)
     }
 
+    single {
+        Room.databaseBuilder(
+            androidApplication(),
+            KotoDexDatabase::class.java,
+            "kotodex-database"
+        ).build()
+    }
+
+    single {
+        get<KotoDexDatabase>().tcgCardDao()
+    }
+
     single<PokemonCardRepository> {
-        PokemonCardRepositoryImpl(get())
+        PokemonCardRepositoryImpl(apiService = get(), tcgCardDao = get())
     }
 
     viewModel {
@@ -44,5 +61,15 @@ val appModule = module {
 
     viewModel {
         GachaViewModel(get())
+    }
+    viewModel { params ->
+        CardDetailViewModel(
+            repository = get(),
+            savedStateHandle = params.get()
+        )
+    }
+
+    viewModel {
+        CollectionViewModel(get())
     }
 }

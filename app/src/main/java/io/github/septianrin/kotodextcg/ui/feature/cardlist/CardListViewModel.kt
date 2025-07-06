@@ -1,8 +1,8 @@
-package io.github.septianrin.kotodextcg.ui.viewmodel
+package io.github.septianrin.kotodextcg.ui.feature.cardlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.septianrin.kotodextcg.data.model.Card
+import io.github.septianrin.kotodextcg.data.model.TcgCard
 import io.github.septianrin.kotodextcg.domain.PokemonCardRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class CardListUiState(
-    val cards: List<Card> = emptyList(),
+    val tcgCards: List<TcgCard> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingNextPage: Boolean = false,
     val error: String? = null,
@@ -25,6 +25,7 @@ sealed interface CardListEvent {
     data object LoadFirstPage : CardListEvent
     data object LoadNextPage : CardListEvent
     data class OnSearchQueryChanged(val query: String) : CardListEvent
+    data object ClearError : CardListEvent
 }
 
 class CardListViewModel(
@@ -37,7 +38,6 @@ class CardListViewModel(
     private var searchJob: Job? = null
 
     init {
-        // Load the initial data when the ViewModel is created.
         loadCards(page = 1)
     }
 
@@ -62,6 +62,9 @@ class CardListViewModel(
                     loadCards(page = 1)
                 }
             }
+            is CardListEvent.ClearError -> {
+                _uiState.update { it.copy(error = null) }
+            }
         }
     }
 
@@ -83,7 +86,7 @@ class CardListViewModel(
                         it.copy(
                             isLoading = false,
                             isLoadingNextPage = false,
-                            cards = if (page == 1) newCards else it.cards + newCards,
+                            tcgCards = if (page == 1) newCards else it.tcgCards + newCards,
                             currentPage = page,
                             canLoadMore = newCards.size == 8
                         )

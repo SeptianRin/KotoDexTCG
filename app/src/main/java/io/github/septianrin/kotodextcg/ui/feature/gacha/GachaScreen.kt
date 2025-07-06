@@ -1,5 +1,6 @@
-package io.github.septianrin.kotodextcg.ui.screen
+package io.github.septianrin.kotodextcg.ui.feature.gacha
 
+import android.graphics.Typeface
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -56,33 +57,29 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.septianrin.kotodextcg.R
-import io.github.septianrin.kotodextcg.data.model.Card
+import io.github.septianrin.kotodextcg.data.model.TcgCard
 import io.github.septianrin.kotodextcg.ui.component.CardDetailOverlay
 import io.github.septianrin.kotodextcg.ui.component.CardListItem
+import io.github.septianrin.kotodextcg.ui.component.ErrorDialog
 import io.github.septianrin.kotodextcg.ui.state.GachaInteractionState
-import io.github.septianrin.kotodextcg.ui.viewmodel.GachaEvent
-import io.github.septianrin.kotodextcg.ui.viewmodel.GachaViewModel
 import io.github.septianrin.kotodextcg.util.Rarity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.abs
 import kotlin.random.Random
 
 @Composable
 fun GachaScreen(
+    onCardClicked: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GachaViewModel = koinViewModel()
 ) {
     val vmState by viewModel.uiState.collectAsState()
-    var selectedCard by remember { mutableStateOf<Card?>(null) }
-
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(GachaEvent.ResetToTear)
-    }
+    var selectedTcgCard by remember { mutableStateOf<TcgCard?>(null) }
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -96,15 +93,6 @@ fun GachaScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )
-        } else if (vmState.error != null) {
-            Text(
-                text = "An error occurred:\n${vmState.error}",
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(16.dp)
-            )
-            Button(onClick = { viewModel.handleEvent(GachaEvent.PrepareNewPack) }) {
-                Text("Try Again")
-            }
         } else {
             when (vmState.interactionState) {
                 GachaInteractionState.Tearing -> {
@@ -117,6 +105,9 @@ fun GachaScreen(
                 }
 
                 GachaInteractionState.ShowingResults -> {
+                    LaunchedEffect(Unit) {
+                        viewModel.handleEvent(GachaEvent.SavePulledCards)
+                    }
                     Text(
                         "You pulled:",
                         style = MaterialTheme.typography.headlineSmall,
@@ -127,15 +118,30 @@ fun GachaScreen(
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(8.dp)
                     ) {
-                        items(vmState.pulledCards.size) { index ->
-                            val card = vmState.pulledCards[index]
-                            CardListItem(card = card) { selectedCard = card }
+                        items(vmState.pulledTcgCards.size) { index ->
+                            val card = vmState.pulledTcgCards[index]
+                            CardListItem(
+                                tcgCard = card,
+                                onClick = { onCardClicked(card.id) }
+                            )
                         }
                     }
-                    if (selectedCard != null) {
+                    vmState.error?.let { errorMessage ->
+                        ErrorDialog(
+                            onDismissRequest = { viewModel.handleEvent(GachaEvent.ClearError) },
+                            onConfirmation = {
+                                viewModel.handleEvent(GachaEvent.ClearError)
+                                viewModel.handleEvent(GachaEvent.PrepareNewPack)
+                            },
+                            dialogTitle = "Pack Error",
+                            dialogText = errorMessage
+                        )
+                    }
+
+                    if (selectedTcgCard != null) {
                         CardDetailOverlay(
-                            card = selectedCard!!,
-                            onDismiss = { selectedCard = null }
+                            tcgCard = selectedTcgCard!!,
+                            onDismiss = { selectedTcgCard = null }
                         )
                     }
                     Button(
@@ -206,9 +212,9 @@ fun InteractiveBoosterPack(rarity: Rarity, onSlashComplete: () -> Unit) {
                                 val dragVector = dragEndPos - dragStartPos
                                 val isTopArea = dragStartPos.y < size.height / 2
                                 val isSlashGesture =
-                                    kotlin.math.abs(dragVector.x) > size.width * 0.3
+                                    abs(dragVector.x) > size.width * 0.3
                                 val isTolerableStraight =
-                                    kotlin.math.abs(dragVector.y) < size.height * 0.5
+                                    abs(dragVector.y) < size.height * 0.5
 
                                 if (isTopArea && isSlashGesture && isTolerableStraight) {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -271,7 +277,15 @@ fun RainbowTrail(points: List<Offset>, isVisible: Boolean) {
 
     Canvas(modifier = Modifier.fillMaxSize()) {
         if (points.size > 1) {
-            val baseColors = listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
+            val baseColors = listOf(
+                Color.Red,
+                Color.Yellow,
+                Color.Green,
+                Color.Cyan,
+                Color.Blue,
+                Color.Magenta,
+                Color.Red
+            )
 
             val colorOffset = colorShift * baseColors.size
 
@@ -317,7 +331,7 @@ fun SlashGuide(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
         val pathEffect = PathEffect.dashPathEffect(floatArrayOf(20f, 20f), 0f)
         drawLine(
-            color = Color.Black.copy(alpha=alpha),
+            color = Color.Black.copy(alpha = alpha),
             start = Offset(0f, 0f),
             end = Offset(size.width, 0f),
             strokeWidth = 5.dp.toPx(),
@@ -328,16 +342,21 @@ fun SlashGuide(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BoosterPackAsset(rarity: Rarity, topPieceOffsetY: Float, packArt: Painter, modifier: Modifier = Modifier) {
+fun BoosterPackAsset(
+    rarity: Rarity,
+    topPieceOffsetY: Float,
+    packArt: Painter,
+    modifier: Modifier = Modifier
+) {
     val rarityBrush = getRarityBrush(rarity)
     val paint = remember {
         Paint().asFrameworkPaint().apply {
             isAntiAlias = true
             textAlign = android.graphics.Paint.Align.CENTER
             color = android.graphics.Color.WHITE
-            typeface = android.graphics.Typeface.create(
-                android.graphics.Typeface.DEFAULT,
-                android.graphics.Typeface.BOLD
+            typeface = Typeface.create(
+                Typeface.DEFAULT,
+                Typeface.BOLD
             )
             setShadowLayer(5f, 0f, 0f, android.graphics.Color.BLACK)
         }
@@ -382,7 +401,7 @@ fun BoosterPackAsset(rarity: Rarity, topPieceOffsetY: Float, packArt: Painter, m
 
         // Pack Art
         translate(top = topPortionHeight + 20.dp.toPx(), left = 20.dp.toPx()) {
-            with(packArt){
+            with(packArt) {
                 draw(size = Size(160.dp.toPx(), 200.dp.toPx()))
             }
         }

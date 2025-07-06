@@ -1,8 +1,8 @@
-package io.github.septianrin.kotodextcg.ui.viewmodel
+package io.github.septianrin.kotodextcg.ui.feature.gacha
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.septianrin.kotodextcg.data.model.Card
+import io.github.septianrin.kotodextcg.data.model.TcgCard
 import io.github.septianrin.kotodextcg.domain.PokemonCardRepository
 import io.github.septianrin.kotodextcg.ui.state.GachaInteractionState
 import kotlinx.coroutines.async
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class GachaUiState(
-    val pulledCards: List<Card> = emptyList(),
+    val pulledTcgCards: List<TcgCard> = emptyList(),
     val packRarity: String? = null,
     val isPreparing: Boolean = true,
     val error: String? = null,
@@ -23,8 +23,9 @@ data class GachaUiState(
 
 sealed interface GachaEvent {
     data object PrepareNewPack : GachaEvent
-    data object ResetToTear : GachaEvent
     data object ShowResults : GachaEvent
+    object ClearError : GachaEvent
+    object SavePulledCards : GachaEvent
 }
 
 class GachaViewModel(
@@ -41,18 +42,25 @@ class GachaViewModel(
     fun handleEvent(event: GachaEvent) {
         when (event) {
             is GachaEvent.PrepareNewPack -> prepareNewPack()
-            is GachaEvent.ResetToTear -> _uiState.update {
-                it.copy(interactionState = GachaInteractionState.Tearing)
-            }
             is GachaEvent.ShowResults -> _uiState.update {
                 it.copy(interactionState = GachaInteractionState.ShowingResults)
+            }
+            is GachaEvent.ClearError -> {
+                _uiState.update { it.copy(error = null) }
+            }
+            is GachaEvent.SavePulledCards -> {
+                viewModelScope.launch {
+                    _uiState.value.pulledTcgCards.forEach { card ->
+                        repository.saveCardToCollection(card)
+                    }
+                }
             }
         }
     }
 
     private fun prepareNewPack() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isPreparing = true, error = null)}
+            _uiState.update { it.copy(isPreparing = true)}
 
             try {
                 val packContents = coroutineScope {
@@ -76,7 +84,7 @@ class GachaViewModel(
                 _uiState.update {
                     it.copy(
                         isPreparing = false,
-                        pulledCards = packContents,
+                        pulledTcgCards = packContents,
                         packRarity = determineBestRarity(packContents),
                         interactionState = GachaInteractionState.Tearing
                     )
@@ -89,7 +97,7 @@ class GachaViewModel(
         }
     }
 
-    private suspend fun getRareCard(): Result<List<Card>> {
+    private suspend fun getRareCard(): Result<List<TcgCard>> {
         val rarityRoll = (0..5).random()
         val rareQuery = when {
             rarityRoll > 4 -> "rarity:\"Rare Secret\" or rarity:\"Rare Rainbow\""
@@ -101,12 +109,12 @@ class GachaViewModel(
         return repository.getCards(page = (1..5).random(), query = rareQuery)
     }
 
-    private fun determineBestRarity(cards: List<Card>): String {
+    private fun determineBestRarity(tcgCards: List<TcgCard>): String {
         val rarityOrder = listOf(
             "Rare Secret", "Rare Rainbow", "Rare Holo VMAX", "Rare Holo VSTAR",
             "Rare Holo V", "Rare Holo", "Rare", "Uncommon", "Common"
         )
-        return cards
+        return tcgCards
             .mapNotNull { it.rarity }
             .minByOrNull { rarityOrder.indexOf(it).takeIf { i -> i != -1 } ?: Int.MAX_VALUE }
             ?: "Common"
