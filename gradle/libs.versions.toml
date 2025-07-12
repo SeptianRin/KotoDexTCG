@@ -17,7 +17,7 @@ room = "2.6.1"
 
 # Test Library Versions
 junit = "4.13.2"
-mockk = "1.13.5"
+mockk = "1.13.8"
 turbine = "1.0.0"
 androidxTestExtJunit = "1.1.5"
 espressoCore = "3.5.1"
@@ -68,6 +68,8 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+mockk-agent = { group = "io.mockk", name = "mockk-agent", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version.ref = "koin" }
@@ -87,13 +89,13 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 # Grouping dependencies into bundles
 [bundles]
-compose = ["androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-ui-tooling-preview", "androidx-compose-material3", "androidx-navigation-compose","androidx-material-icons-extended"]
+compose = ["androidx-compose-ui", "androidx-compose-ui-graphics", "androidx-compose-ui-tooling-preview", "androidx-compose-material3", "androidx-navigation-compose", "androidx-material-icons-extended"]
 lifecycle = ["androidx-lifecycle-viewmodel-ktx", "androidx-lifecycle-viewmodel-compose", "androidx-lifecycle-runtime-compose"]
 coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-android"]
 koin = ["koin-android", "koin-androidx-compose"]
 retrofit = ["squareup-retrofit", "squareup-retrofit-converter-gson", "squareup-okhttp-logging-interceptor"]
-room = ["androidx-room-runtime","androidx-room-ktx"]
+room = ["androidx-room-runtime", "androidx-room-ktx"]
 
 # Test Bundles
 unit-test = ["junit", "kotlinx-coroutines-test", "mockk", "turbine", "koin-test", "koin-test-junit4"]
-android-test = ["mockk", "androidx-test-ext-junit", "androidx-espresso-core", "androidx-compose-ui-test-junit4", "koin-test", "koin-test-junit4"]
+android-test = ["mockk-agent","mockk-android", "androidx-test-ext-junit", "androidx-espresso-core", "androidx-compose-ui-test-junit4", "koin-test", "koin-test-junit4"]
