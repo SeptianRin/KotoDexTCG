@@ -1,21 +1,29 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# These are the rules for your app-specific ProGuard configuration.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep Kotlin metadata
+-keep class kotlin.Metadata { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep Coroutines internal classes
+-keepclassmembers class kotlinx.coroutines.internal.** {
+    *;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep your data/model classes that are used by Retrofit/Gson for serialization.
+# This is one of the most important rules. It tells R8 not to remove or
+# obfuscate the classes in your 'data.model' package.
+-keep class io.github.septianrin.kotodextcg.data.model.** { *; }
+-keep class io.github.septianrin.kotodextcg.data.network.** { *; }
+
+
+# Keep classes needed by the Coil image loading library
+-keep class coil.** { *; }
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    <init>(...);
+}
+
+# General rules for keeping classes that might be used via reflection
+-keepattributes Signature
+-keepattributes *Annotation*
+
+# Keep names of any class that is an interface.
+-keepnames interface ** { *; }
