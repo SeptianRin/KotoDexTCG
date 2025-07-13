@@ -99,7 +99,3 @@ coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-android"]
 koin = ["koin-android", "koin-androidx-compose"]
 retrofit = ["squareup-retrofit", "squareup-retrofit-converter-gson", "squareup-okhttp-logging-interceptor"]
 room = ["androidx-room-runtime", "androidx-room-ktx"]
-
-# Test Bundles
-unit-test = ["androidx-test-core","junit", "kotlinx-coroutines-test", "mockk", "turbine", "koin-test", "koin-test-junit4","robolectric"]
-android-test = ["mockk-android", "androidx-test-ext-junit", "androidx-espresso-core", "androidx-compose-ui-test-junit4", "koin-test", "koin-test-junit4"]

@@ -118,11 +118,26 @@ dependencies {
 
     implementation(libs.coil.compose)
 
-    // Unit Test Dependencies
-    testImplementation(libs.bundles.unit.test)
+    // --- Unit Test Dependencies (testImplementation) ---
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.turbine)
+    testImplementation(libs.koin.test)
+    testImplementation(libs.koin.test.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 
-    // Instrumentation Test Dependencies
-    androidTestImplementation(libs.bundles.android.test)
+
+    // --- Instrumentation Test Dependencies (androidTestImplementation) ---
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.mockk.android) // mockk-android is ONLY here
+    androidTestImplementation(libs.koin.test)
+    androidTestImplementation(libs.koin.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
