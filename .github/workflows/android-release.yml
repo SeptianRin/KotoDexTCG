@@ -40,15 +40,15 @@ jobs:
         run: ./gradlew test
 
       # Step 5: Run Instrumentation Tests (Requires an emulator)
-#      - name: Run Instrumentation Tests
-#        uses: reactivecircus/android-emulator-runner@v2
-#        with:
-#          api-level: 31
-#          target: google_apis
-#          arch: x86_64
-#          script: sleep 30; ./gradlew connectedCheck
-#          emulator-boot-timeout: 1800
-#          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-accel 
+      - name: Run Instrumentation Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: google_apis
+          arch: x86_64
+          script: sleep 30; ./gradlew connectedCheck
+          emulator-boot-timeout: 1800
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-accel
 
       # Step 7: Build Signed Release APK
       - name: Build Signed Release APK
