@@ -9,6 +9,12 @@ plugins {
 
 configurations.all {
     exclude(group = "com.intellij", module = "annotations")
+
+}
+configurations{
+    androidTestImplementation {
+        exclude(group = "io.mockk", module = "mockk-agent")
+    }
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
