@@ -13,7 +13,7 @@ configurations.all {
 }
 configurations{
     androidTestImplementation {
-        exclude(group = "io.mockk", module = "mockk-agent")
+        exclude(group = "io.mockk", module = "mockk-agent-jvm")
     }
 }
 
