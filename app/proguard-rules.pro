@@ -49,4 +49,19 @@
 #############################################
 # Application model package (replace as needed)
 #############################################
--keep class com.kotodex.model.** { *; }  # Adjust if your model package is different
+-keep class io.github.septianrin.kotodextcg.data.** { *; }  # Adjust if your model package is different
+
+# Keep Retrofit generic type information
+-keepattributes Signature
+-keepattributes *Annotation*
+
+# Keep generic types for Gson/Retrofit
+-keep class com.yourpackage.model.** { *; }  # Adjust to your actual model package
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep Retrofit converters
+-keep class retrofit2.** { *; }
+-keep interface retrofit2.** { *; }
+-dontwarn retrofit2.**
