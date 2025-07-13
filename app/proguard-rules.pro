@@ -43,3 +43,20 @@
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
+
+# Keep Room database and DAO classes
+-keep class androidx.room.RoomDatabase { *; }
+-keep class * extends androidx.room.RoomDatabase
+-keep class * extends androidx.room.RoomDatabase { *; }
+
+# Keep annotated Entities, DAOs, Converters, etc.
+-keep @androidx.room.Database class * { *; }
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao class * { *; }
+-keep @androidx.room.TypeConverter class * { *; }
+
+# Keep Kotlin metadata (needed for reflection-based libraries like Room)
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+-keepattributes *Annotation*
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
