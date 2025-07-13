@@ -27,3 +27,19 @@
 
 # Keep names of any class that is an interface.
 -keepnames interface ** { *; }
+
+# Retrofit
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+
+# Gson model classes (replace `your.package.model.**` with your actual package)
+-keep class your.package.model.** { *; }
+-keep class com.google.gson.** { *; }
+-keepattributes *Annotation*
+
+# Keep class names and fields with annotations like @SerializedName
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
